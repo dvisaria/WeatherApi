@@ -7,8 +7,8 @@ open folder in visual studio code
 cd weatherapi
 
 run command in the terminal
-dotnet build
-dotnet run
+  dotnet build
+  dotnet run
 
 url to access api
   https://localhost:7121/weatherForecast?lat=64.835365&lon=-147.776749
