@@ -4,11 +4,10 @@ clone folder from github https://github.com/dvisaria/WeatherApi
 
 open folder in visual studio code
 
-cd weatherapi
-
-run command in the terminal
-  dotnet build
-  dotnet run
+open new terminal window and run follwing command
+  > cd weatherapi
+  weatherapi> dotnet build
+  weatherapi> dotnet run
 
 url to access api
   https://localhost:7121/weatherForecast?lat=64.835365&lon=-147.776749
