@@ -7,6 +7,6 @@ namespace WeatherAPI.Interface
 {
     public interface IWeatherService
     {
-         public Task<Forecast> GetCurrentWeather(Location location);
+         public Task<Forecast?> GetCurrentWeather(Location location);
     }
 }

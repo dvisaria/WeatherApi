@@ -21,33 +21,39 @@ namespace WeatherApi.Models
         {
             try
             {
-                var json = (JObject)JsonConvert.DeserializeObject(result);
+                var json = (JObject?)JsonConvert.DeserializeObject(result);
 
                 if (json != null)
                 {
                     Forecast forecast = new Forecast();
                     if(json.SelectToken("current.weather[0].main") != null) 
-                        forecast.Condition = json.SelectToken("current.weather[0].main").Value<string>();
+                        forecast.Condition = json.SelectToken("current.weather[0].main")?.Value<string>();
 
                     if (json.SelectToken("current.temp") != null)
                     {
+#pragma warning disable CS8604 // Possible null reference argument.
                         double temp = json.SelectToken("current.temp").Value<double>();
+#pragma warning restore CS8604 // Possible null reference argument.
                         forecast.SetFeels(temp);
                         forecast.Temperature = temp.ToString() + " °F";
                     }
 
                     if(json.SelectToken("current.weather[0].description") != null)
-                        forecast.Description = json.SelectToken("current.weather[0].description").Value<string>();
+                        forecast.Description = json.SelectToken("current.weather[0].description")?.Value<string>();
 
                     if (json.SelectToken("alerts") != null)
                     {
                         var alert = new Alert();
-                        alert.SenderName = json.SelectToken("alerts[0].sender_name").Value<string>();
-                        alert.Event = json.SelectToken("alerts[0].event").Value<string>();
-                        alert.Description = json.SelectToken("alerts[0].description").Value<string>();
+                        alert.SenderName = json.SelectToken("alerts[0].sender_name")?.Value<string>();
+                        alert.Event = json.SelectToken("alerts[0].event")?.Value<string>();
+                        alert.Description = json.SelectToken("alerts[0].description")?.Value<string>();
+#pragma warning disable CS8604 // Possible null reference argument.
                         double start = json.SelectToken("alerts[0].start").Value<double>();
+#pragma warning restore CS8604 // Possible null reference argument.
                         alert.Start = Alert.UnixTimeStampToDateTime(start);
+#pragma warning disable CS8604 // Possible null reference argument.
                         double end = json.SelectToken("alerts[0].end").Value<double>();
+#pragma warning restore CS8604 // Possible null reference argument.
                         alert.End = Alert.UnixTimeStampToDateTime(end);
 
                         forecast.alerts.Add(alert);

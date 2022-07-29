@@ -22,7 +22,7 @@ namespace WeatherAPI.Services
         }
 
 
-        public async Task<Forecast> GetCurrentWeather(Location location)
+        public async Task<Forecast?> GetCurrentWeather(Location location)
         {
             string url = $"{_baseUrl}?lat={location.Lat}&lon={location.Lon}&exclude=minutely,hourly,daily&units=imperial&appid={_apiKey}";
             return await GetResponse(url);
@@ -42,7 +42,7 @@ namespace WeatherAPI.Services
                     result = await response.Content.ReadAsStringAsync();
                     if (result != null)
                     {
-                        Forecast forecast = Forecast.Create(result);
+                        Forecast? forecast = Forecast.Create(result);
                         return forecast;
 
 
@@ -51,9 +51,8 @@ namespace WeatherAPI.Services
                 var errorString = await response.Content.ReadAsStringAsync();
                 return null;
             }
-            catch(Exception ex)
+            catch
             {
-       
                 return null;
             }
             
