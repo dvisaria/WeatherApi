@@ -13,8 +13,6 @@ namespace WeatherApiTest1
     {
         Mock<IWeatherService> mockService;
         Mock<ILogger<WeatherForecastController>> mockLogger;
-
-
         WeatherForecastController controller;
 
         private void SimulateValidation(Location model)
@@ -34,12 +32,17 @@ namespace WeatherApiTest1
             mockService = new Mock<IWeatherService>();
             mockLogger = new Mock<ILogger<WeatherForecastController>>();
 
-
+            Forecast forecast = new Forecast();
+            Location loc = new Location(64.835365, -147.776749);
+            mockService.Setup(x =>
+            x.GetCurrentWeather(loc))
+                .Returns(Task.FromResult(forecast)
+            );
             controller = new WeatherForecastController(mockLogger.Object, mockService.Object);
         }
 
         [Test]
-        public void InvalidLatLon()
+        public void NullLatLonValidation()
         {
             
             // Act
@@ -48,47 +51,62 @@ namespace WeatherApiTest1
             Task<IActionResult> actionResult = controller.GetCurrentWeather(loc);
 
             // Assert
-            Assert.IsInstanceOf<BadRequestObjectResult>(actionResult.Result);
+            Assert.IsInstanceOf<BadRequestObjectResult>(actionResult.Result);            
+        }
 
-            // Arrange
-            controller = new WeatherForecastController(mockLogger.Object, mockService.Object);
+        [Test]
+        public void NullLatValidation()
+        {
 
             // Act
-            loc.Lat = 0.0;
+            Location loc = new Location();
+            loc.Lat = 0;
             SimulateValidation(loc);
-            actionResult = controller.GetCurrentWeather(loc);
+            Task<IActionResult> actionResult = controller.GetCurrentWeather(loc);
 
             // Assert
             Assert.IsInstanceOf<BadRequestObjectResult>(actionResult.Result);
+        }
 
-            // Arrange
-            controller = new WeatherForecastController(mockLogger.Object, mockService.Object);
-
-            // Act
-            loc.Lon = 0.0;
-            SimulateValidation(loc);
-            actionResult = controller.GetCurrentWeather(loc);
-
-            // Assert
-            Assert.IsInstanceOf<NotFoundResult>(actionResult.Result);
-
-            // Arrange
-            controller = new WeatherForecastController(mockLogger.Object, mockService.Object);
+        [Test]
+        public void NullLonValidation()
+        {
 
             // Act
-            loc.Lat = -100;
-            loc.Lon = 181;
+            Location loc = new Location();
+            loc.Lat = 0;
             SimulateValidation(loc);
-            actionResult = controller.GetCurrentWeather(loc);
+            Task<IActionResult> actionResult = controller.GetCurrentWeather(loc);
 
             // Assert
             Assert.IsInstanceOf<BadRequestObjectResult>(actionResult.Result);
+        }
+
+        [Test]
+        public void LatRangeValidation()
+        {
 
             // Act
-            loc.Lat = 100;
-            loc.Lon = -181;
+            Location loc = new Location();
+            loc.Lat = -90.00001;
+            loc.Lon = 0;
             SimulateValidation(loc);
-            actionResult = controller.GetCurrentWeather(loc);
+            Task<IActionResult> actionResult = controller.GetCurrentWeather(loc);
+
+            // Assert
+            Assert.IsInstanceOf<BadRequestObjectResult>(actionResult.Result);
+        }
+
+        [Test]
+        public void LonRangeValidation()
+        {
+
+            // Act
+            Location loc = new Location();
+            loc.Lat = 0;
+            loc.Lon = 180.01;
+            SimulateValidation(loc);
+            Task<IActionResult> actionResult = controller.GetCurrentWeather(loc);
 
             // Assert
             Assert.IsInstanceOf<BadRequestObjectResult>(actionResult.Result);
@@ -96,38 +114,53 @@ namespace WeatherApiTest1
 
 
         [Test]
+        public void NotFoundResponse()
+        {
+            Forecast forecast = null;
+
+            Location loc = new Location();
+            loc.Lat = 0;
+            loc.Lon = 0;
+            mockService.Setup(x =>
+            x.GetCurrentWeather(loc))
+                .Returns(Task.FromResult(forecast)
+            );
+
+            // Act            
+            SimulateValidation(loc);
+            Task<IActionResult> actionResult = controller.GetCurrentWeather(loc);
+
+            // Assert
+            Assert.IsInstanceOf<NotFoundResult>(actionResult.Result);
+
+
+        }
+
+
+        [Test]
         public void GetCurrentWeather()
         {
             // Arrange
-            var mockService = new Mock<IWeatherService>();
-            var mockLogger = new Mock<ILogger<WeatherForecastController>>();
+            Location loc = new Location(64.835365, -147.776749);
             Forecast forecast = new Forecast();
             forecast.Condition = "Clouds";
             forecast.Description = "scattered clouds";
             double temp = 64.45;
             forecast.Temperature = temp.ToString() + " °F";
             forecast.SetFeels(temp);
-
-
             Alert alert = new Alert();
             alert.SenderName = "NWS Fairbanks (Northern Alaska - Fairbanks)";
             alert.Event = "Special Weather Statement";
             alert.Description = "...Frost Possible Tonight In Low Lying Areas Of The Eastern\nInterior...\nCold air now in place across the Eastern Interior, combined with\nclearing skies tonight, will cause very cool temperatures across\nthe Eastern Interior tonight. Valley locations that are prone to\nsummer frost will likely see frost tonight, such as areas near\nGoldstream Creek, the Chatanika River, the Upper Chena River, and\nthe Fortymile River as well as Denali Park.\nPeople in these low lying areas with frost sensitive plants\nshould take necessary precautions to protect them tonight.";
-            //alert.Start = new DateTime("2022-07-28T15:24:00-04:00");
-            //alert.End = new DateTime("2022-07-29T10:00:00-04:00");
             forecast.alerts.Add(alert);
 
-            Location loc = new Location(64.835365, -147.776749);
-            mockService.Setup(x => 
+            mockService.Setup(x =>
             x.GetCurrentWeather(loc))
                 .Returns(Task.FromResult(forecast)
             );
 
-
-            var controller = new WeatherForecastController(mockLogger.Object, mockService.Object);
-            
-            SimulateValidation(loc);
             // Act
+            SimulateValidation(loc);
             Task<IActionResult> actionResult = controller.GetCurrentWeather(loc);
             var contentResult = (OkObjectResult)actionResult.Result;            
 
@@ -135,6 +168,10 @@ namespace WeatherApiTest1
             Assert.IsNotNull(contentResult);
             Assert.IsInstanceOf<OkObjectResult>(contentResult);
             Assert.IsInstanceOf<Forecast>(contentResult.Value);
+            Forecast result = contentResult.Value as Forecast;
+            Assert.AreEqual(result.Temperature, forecast.Temperature);
+            Assert.AreEqual(result.Feels, forecast.Feels);
+            Assert.AreEqual(result.Condition, forecast.Condition);
         }
     }
 }
