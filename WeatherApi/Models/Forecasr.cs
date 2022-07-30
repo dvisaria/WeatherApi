@@ -8,6 +8,9 @@ namespace WeatherApi.Models
     {
         private string _feels = "";
 
+        public double Lat { get; set; }
+        public double Lon { get; set; }
+
         public string? Condition { get; set; }
         public string? Description { get; set; }
 
@@ -26,7 +29,11 @@ namespace WeatherApi.Models
                 if (json != null)
                 {
                     Forecast forecast = new Forecast();
-                    if(json.SelectToken("current.weather[0].main") != null) 
+                    if (json.SelectToken("lat") != null)
+                        forecast.Lat = json.SelectToken("lat").Value<double>();
+                    if (json.SelectToken("lon") != null)
+                        forecast.Lon = json.SelectToken("lon").Value<double>();
+                    if (json.SelectToken("current.weather[0].main") != null) 
                         forecast.Condition = json.SelectToken("current.weather[0].main")?.Value<string>();
 
                     if (json.SelectToken("current.temp") != null)
