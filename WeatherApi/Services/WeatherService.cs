@@ -13,11 +13,14 @@ namespace WeatherAPI.Services
     {
         static string? _baseUrl;
         static string? _apiKey;
+        static HttpClient? _client;
         
-        public WeatherService(string baseUrl, string apiKey)
+        public WeatherService(IConfiguration config, HttpClient client)
         {
-            _baseUrl = baseUrl;
-            _apiKey = apiKey;
+            _baseUrl = config.GetSection("WeatherApi").GetValue<string>("BaseUrl");
+            _apiKey = config.GetSection("WeatherApi").GetValue<string>("ApiKey");
+
+            _client = client;
 
         }
 
@@ -33,8 +36,9 @@ namespace WeatherAPI.Services
             string result;
             try
             {
-                var client = new HttpClient();
-                HttpResponseMessage response = await client.GetAsync(address);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                HttpResponseMessage response = await _client.GetAsync(address);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 response.EnsureSuccessStatusCode();
             
                 if (response.IsSuccessStatusCode)

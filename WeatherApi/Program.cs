@@ -4,9 +4,10 @@ using WeatherAPI.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSingleton<HttpClient>();
+builder.Services.AddTransient<IWeatherService>(x =>
+    ActivatorUtilities.CreateInstance<WeatherService>(x, new HttpClient(), builder.Configuration ));
 
-builder.Services.AddSingleton<IWeatherService>(x =>
-    ActivatorUtilities.CreateInstance<WeatherService>(x, "https://api.openweathermap.org/data/3.0/onecall", "efc210918503632a4cd7520a5a29de32"));
 
 
 builder.Services.AddControllers();

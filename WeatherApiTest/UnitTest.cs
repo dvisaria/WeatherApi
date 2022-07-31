@@ -116,7 +116,7 @@ namespace WeatherApiTest1
         [Test]
         public void NotFoundResponse()
         {
-            Forecast forecast = null;
+            Forecast? forecast = null;
 
             Location loc = new Location();
             loc.Lat = 0;
@@ -168,10 +168,10 @@ namespace WeatherApiTest1
             Assert.IsNotNull(contentResult);
             Assert.IsInstanceOf<OkObjectResult>(contentResult);
             Assert.IsInstanceOf<Forecast>(contentResult.Value);
-            Forecast result = contentResult.Value as Forecast;
-            Assert.AreEqual(result.Temperature, forecast.Temperature);
-            Assert.AreEqual(result.Feels, forecast.Feels);
-            Assert.AreEqual(result.Condition, forecast.Condition);
+            Forecast? result = contentResult.Value as Forecast;
+            Assert.That(forecast.Temperature, Is.EqualTo(result?.Temperature) );
+            Assert.That(forecast.Feels, Is.EqualTo(result?.Feels));
+            Assert.That(forecast.Condition, Is.EqualTo(result?.Condition));            
         }
     }
 }

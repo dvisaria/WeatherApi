@@ -30,9 +30,13 @@ namespace WeatherApi.Models
                 {
                     Forecast forecast = new Forecast();
                     if (json.SelectToken("lat") != null)
+#pragma warning disable CS8604 // Possible null reference argument.
                         forecast.Lat = json.SelectToken("lat").Value<double>();
+#pragma warning restore CS8604 // Possible null reference argument.
                     if (json.SelectToken("lon") != null)
+#pragma warning disable CS8604 // Possible null reference argument.
                         forecast.Lon = json.SelectToken("lon").Value<double>();
+#pragma warning restore CS8604 // Possible null reference argument.
                     if (json.SelectToken("current.weather[0].main") != null) 
                         forecast.Condition = json.SelectToken("current.weather[0].main")?.Value<string>();
 
